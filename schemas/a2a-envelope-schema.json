@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "A2A Message Envelope",
+  "description": "JSON Schema for Agent-to-Agent (A2A) message envelope format",
+  "type": "object",
+  "required": ["envelope", "message"],
+  "properties": {
+    "envelope": {
+      "type": "object",
+      "required": ["metadata", "routing", "security"],
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "required": ["id", "version", "timestamp"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique message identifier"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$",
+              "description": "Protocol version (semantic versioning)"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Message creation timestamp"
+            },
+            "correlation_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Optional ID linking related messages"
+            },
+            "trace_id": {
+              "type": "string",
+              "description": "Distributed tracing ID"
+            }
+          }
+        },
+        "routing": {
+          "type": "object",
+          "required": ["source", "destination"],
+          "properties": {
+            "source": {
+              "type": "object",
+              "required": ["agent_id", "service_id"],
+              "properties": {
+                "agent_id": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "description": "Originating agent identifier"
+                },
+                "service_id": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "description": "Originating service identifier"
+                }
+              }
+            },
+            "destination": {
+              "type": "object",
+              "required": ["agent_id"],
+              "properties": {
+                "agent_id": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "description": "Target agent identifier"
+                },
+                "service_id": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "description": "Optional target service identifier"
+                }
+              }
+            },
+            "reply_to": {
+              "type": "string",
+              "description": "Topic or channel for responses"
+            }
+          }
+        },
+        "security": {
+          "type": "object",
+          "required": ["auth_token"],
+          "properties": {
+            "auth_token": {
+              "type": "string",
+              "description": "Authentication token (JWT)"
+            },
+            "signature": {
+              "type": "string",
+              "description": "Optional message signature"
+            },
+            "tenant_id": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "Optional multi-tenant identifier"
+            }
+          }
+        }
+      }
+    },
+    "message": {
+      "type": "object",
+      "required": ["type", "intent"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["TASK_REQUEST", "TASK_RESPONSE", "EVENT", "HEARTBEAT", "DISCOVERY", "CONTROL"],
+          "description": "Message classification"
+        },
+        "intent": {
+          "type": "string",
+          "description": "Specific operation being requested"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Message content specific to the intent"
+        }
+      }
+    }
+  }
+}
